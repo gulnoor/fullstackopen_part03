@@ -21,13 +21,18 @@ let contacts = [
   },
 ];
 const express = require("express");
+const dexter = require("morgan");
+dexter.token("body", (req) => JSON.stringify(req.body));
+
 const app = express();
 app.use(express.json());
+app.use(dexter(":method :url :body"));
+
 app.get("/api/persons", (request, response) => {
   response.json(contacts);
 });
 app.post("/api/persons", (request, response) => {
-  const contact = request.body;
+  const contact = { ...request.body };
 
   if (
     contact.name &&
