@@ -22,15 +22,19 @@ let contacts = [
 ];
 const express = require("express");
 const dexter = require("morgan");
+const cors = require("cors");
+
 dexter.token("body", (req) => JSON.stringify(req.body));
 
 const app = express();
+app.use(cors());
+app.use(express.static("dist"));
 app.use(express.json());
 app.use(dexter(":method :url :body"));
-
 app.get("/api/persons", (request, response) => {
   response.json(contacts);
 });
+
 app.post("/api/persons", (request, response) => {
   const contact = { ...request.body };
 
@@ -40,8 +44,20 @@ app.post("/api/persons", (request, response) => {
     !contacts.some((c) => c.name === contact.name)
   ) {
     contact.id = Math.floor(Math.random() * 999999) + 1;
-    contacts = contacts.concat(request.body);
+    contacts = contacts.concat(contact);
     response.json(contacts);
+  } else {
+    response.status(404).json({ error: "name must be unique" });
+  }
+});
+app.put("/api/persons/:id", (request, response) => {
+  const id = parseInt(request.params.id);
+  const contact = { ...request.body, id };
+
+  if (contact.name && contact.number) {
+    contacts = contacts.filter((c) => c.id !== id);
+    contacts = contacts.concat(contact);
+    response.json(contact);
   } else {
     response.status(404).json({ error: "name must be unique" });
   }
@@ -50,14 +66,14 @@ app.post("/api/persons", (request, response) => {
 app.get("/api/:id", (request, response) => {
   const id = parseInt(request.params.id);
   const contact = contacts.find((contact) => contact.id === id);
-  contact
-    ? response.json(contacts.find((contact) => contact.id === id))
-    : response.status(404).send();
+  contact ? response.json(contact) : response.status(404).send();
 });
+
 app.delete("/api/:id", (request, response) => {
+  console.log(request.params.id);
   const id = parseInt(request.params.id);
   contacts = contacts.filter((c) => c.id !== id);
-  response.send("deleted successfully");
+  response.json(contacts);
 });
 
 app.get("/info", (request, response) => {
@@ -65,4 +81,7 @@ app.get("/info", (request, response) => {
   ${new Date()}`);
 });
 
-app.listen(3001, () => {});
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
