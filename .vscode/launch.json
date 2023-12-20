@@ -1,5 +1,12 @@
 {
     "configurations": [
+
+        {
+            "command": "nodemon mongo.js",
+            "name": "nodemon",
+            "request": "launch",
+            "type": "node-terminal"
+        },
         {
             "type": "pwa-msedge",
             "name": "Launch Microsoft Edge",

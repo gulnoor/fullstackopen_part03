@@ -2,11 +2,13 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "mongoose": "^8.0.3",
     "morgan": "^1.10.0"
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "mongotest": "node mongo.js"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.4.11",
