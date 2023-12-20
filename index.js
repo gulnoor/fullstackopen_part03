@@ -20,34 +20,33 @@ let contacts = [
     number: "39-23-64231222",
   },
 ];
+require("dotenv").config();
 const express = require("express");
 const dexter = require("morgan");
 const cors = require("cors");
 
 dexter.token("body", (req) => JSON.stringify(req.body));
-
 const app = express();
+const ContactModel = require("./models/contact");
 app.use(cors());
 app.use(express.static("dist"));
 app.use(express.json());
 app.use(dexter(":method :url :body"));
+
 app.get("/api/persons", (request, response) => {
-  response.json(contacts);
+  ContactModel.find({}).then((all) => {
+    response.json(all);
+  });
 });
 
 app.post("/api/persons", (request, response) => {
   const contact = { ...request.body };
 
-  if (
-    contact.name &&
-    contact.number &&
-    !contacts.some((c) => c.name === contact.name)
-  ) {
-    contact.id = Math.floor(Math.random() * 999999) + 1;
-    contacts = contacts.concat(contact);
-    response.json(contacts);
+  if (contact.name && contact.number) {
+    const c = new ContactModel(contact);
+    c.save().then((savedc) => response.json(savedc));
   } else {
-    response.status(404).json({ error: "name must be unique" });
+    response.status(404).json({ error: "bruh..." });
   }
 });
 app.put("/api/persons/:id", (request, response) => {
@@ -81,7 +80,7 @@ app.get("/info", (request, response) => {
   ${new Date()}`);
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,9 +1,8 @@
 {
     "configurations": [
-
         {
-            "command": "nodemon mongo.js",
-            "name": "nodemon",
+            "command": "npm run dev",
+            "name": "nodeomon",
             "request": "launch",
             "type": "node-terminal"
         },
@@ -28,7 +27,6 @@
                 "--remote-debugging-port=9222"
             ],
             "url": "http://localhost:3001",
-
             "presentation": {
                 "hidden": true
             }
@@ -38,7 +36,6 @@
             "name": "Open Edge DevTools",
             "request": "attach",
             "url": "http://localhost:3001",
-
             "presentation": {
                 "hidden": true
             }
