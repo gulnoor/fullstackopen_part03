@@ -15,21 +15,24 @@ app.use(dexter(":method :url :body"));
 app.post("/api/persons", (request, response, next) => {
   const contact = request.body;
   ContactModel.findOneAndUpdate({ name: contact.name }, contact, {
-    new: "true",
+    new: true,
+    runValidators: true,
+    context: "query",
   })
     .then((result) => {
       if (result) {
         response.json(result);
-      } else if (contact.name && contact.number) {
+      } else {
         const c = new ContactModel(contact);
         c.save()
           .then((savedc) => response.json(savedc))
           .catch((err) => next(err));
-      } else {
-        response
-          .status(404)
-          .json({ error: "Enter details before creating contact" });
       }
+      // else {
+      //   response
+      //     .status(404)
+      //     .json({ error: "Enter details before creating contact" });
+      // }
     })
     .catch((e) => next(e));
 });
@@ -47,7 +50,7 @@ app.get("/api/:id", (request, response, next) => {
     .then((searchResult) => {
       searchResult
         ? response.json(searchResult)
-        : response.status(404).json({ error: "contact not found" });
+        : response.status(404).send("contact not found");
     })
     .catch((err) => next(err));
 });
@@ -59,18 +62,19 @@ app.get("/api/:id", (request, response, next) => {
 //update
 app.put("/api/persons/:id", (request, response, next) => {
   const contact = request.body;
+  ContactModel.findByIdAndUpdate(request.params.id, contact, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  })
+    .then((newContact) => response.json(newContact))
+    .catch((err) => next(err));
 
-  if (contact && contact.number) {
-    ContactModel.findByIdAndUpdate(request.params.id, contact, {
-      new: true,
-    })
-      .then((newContact) => response.json(newContact))
-      .catch((err) => next(err));
-  } else {
-    response
-      .status(404)
-      .json({ error: "enter contact details before updating" });
-  }
+  // else {
+  //   response
+  //     .status(404)
+  //     .json({ error: "enter contact details before updating" });
+  // }
 });
 
 //delete
@@ -84,7 +88,9 @@ app.delete("/api/:id", (request, response, next) => {
 const errorhandler = (error, req, res, next) => {
   console.log(error.message);
   if (error.name === "CastError") {
-    return res.status(400).send({ error: "malformatted id" });
+    return res.status(400).send("malformatted id");
+  } else if (error.name === "ValidationError") {
+    return res.status(400).send(error.message);
   }
   next(error);
 };
